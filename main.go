@@ -40,5 +40,5 @@ func main() {
 
 func registerRoutes(r *gin.Engine, cfg config.Config) {
 	lineWebhookHandler := linewebhook.NewHandler(cfg.LineWebhook)
-	r.POST("/webhook/line", lineWebhookHandler.LineWebhook)
+	r.POST("/line/webhook", lineWebhookHandler.LineWebhook)
 }
