@@ -29,18 +29,15 @@ func main() {
 	db := database.Connect(cfg.DSN())
 	defer db.Close()
 
-	// example: print app info
-	log.Printf("🚀 %s is running in %s mode", cfg.Server.Name, cfg.Server.Env)
-
 	if strings.EqualFold(cfg.Server.Env, "prod") {
 		gin.SetMode(gin.ReleaseMode)
 	}
 	r := gin.Default()
-	registerRoutes(r, *cfg)
+	registerRoutes(r, logger, *cfg)
 
 	logger.Info("server_start", zap.String("port", cfg.Server.Port))
 	if err := r.Run(":" + cfg.Server.Port); err != nil {
-		log.Fatal(err)
+		logger.Fatal("server_start_error", zap.Error(err))
 	}
 
 	// graceful shutdown (Ctrl+C)
@@ -51,7 +48,7 @@ func main() {
 	log.Println("🧹 Shutting down gracefully...")
 }
 
-func registerRoutes(r *gin.Engine, cfg config.Config) {
-	lineWebhookHandler := linewebhook.NewHandler(cfg.LineWebhook)
+func registerRoutes(r *gin.Engine, logger *zap.Logger, cfg config.Config) {
+	lineWebhookHandler := linewebhook.NewHandler(logger, cfg.LineWebhook)
 	r.POST("/line/webhook", lineWebhookHandler.LineWebhook)
 }
