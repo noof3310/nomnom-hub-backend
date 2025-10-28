@@ -25,7 +25,7 @@ func WithTx(ctx context.Context, db *bun.DB, fn func(ctx context.Context, tx bun
 
 func (s *Storage) UpsertUserByLineID(ctx context.Context, d model.User) error {
 	_, err := s.db.NewInsert().
-		Model(d).
+		Model(&d).
 		On("CONFLICT (line_id) DO UPDATE").
 		Set("display_name = EXCLUDED.display_name").
 		Returning("*").
@@ -34,7 +34,7 @@ func (s *Storage) UpsertUserByLineID(ctx context.Context, d model.User) error {
 }
 
 func (s *Storage) CreatePlace(ctx context.Context, d model.Place) error {
-	_, err := s.db.NewInsert().Model(d).Exec(ctx)
+	_, err := s.db.NewInsert().Model(&d).Exec(ctx)
 	return err
 }
 

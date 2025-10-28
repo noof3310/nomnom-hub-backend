@@ -15,6 +15,7 @@ func New(env string) *zap.Logger {
 		cfg = zap.NewDevelopmentConfig()
 	}
 
+	cfg.DisableStacktrace = true
 	cfg.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
 	l, _ := cfg.Build()
 	return l
