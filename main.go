@@ -35,9 +35,9 @@ func main() {
 	r := gin.Default()
 	registerRoutes(r, logger, *cfg)
 
-	logger.Info("server_start", zap.String("port", cfg.Server.Port))
+	logger.Info("server start", zap.String("port", cfg.Server.Port))
 	if err := r.Run(":" + cfg.Server.Port); err != nil {
-		logger.Fatal("server_start_error", zap.Error(err))
+		logger.Fatal("cannot start server", zap.Error(err))
 	}
 
 	// graceful shutdown (Ctrl+C)

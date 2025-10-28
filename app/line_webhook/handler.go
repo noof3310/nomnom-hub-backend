@@ -20,7 +20,7 @@ type handler struct {
 func NewHandler(log *zap.Logger, cfg config.LineWebhook) *handler {
 	bot, err := messaging_api.NewMessagingApiAPI(cfg.ChannelToken)
 	if err != nil {
-		log.Fatal("line bot start error", zap.Error(err))
+		log.Fatal("cannot start line bot", zap.Error(err))
 	}
 	return &handler{log: log, cfg: cfg, bot: bot}
 }
