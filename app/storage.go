@@ -15,6 +15,7 @@ type Storage struct {
 }
 
 func NewStorage(db *bun.DB) *Storage {
+	db.RegisterModel((*model.PlaceTag)(nil))
 	return &Storage{db: db}
 }
 
