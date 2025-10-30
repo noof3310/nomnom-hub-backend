@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"database/sql"
 	"nomnomhub/internal/model"
 	"strings"
 
@@ -17,10 +18,22 @@ func NewStorage(db *bun.DB) *Storage {
 	return &Storage{db: db}
 }
 
-func WithTx(ctx context.Context, db *bun.DB, fn func(ctx context.Context, tx bun.Tx) error) error {
-	return db.RunInTx(ctx, nil, func(ctx context.Context, tx bun.Tx) error {
+func (s *Storage) WithTx(ctx context.Context, fn func(ctx context.Context, tx bun.Tx) error) error {
+	return s.db.RunInTx(ctx, nil, func(ctx context.Context, tx bun.Tx) error {
 		return fn(ctx, tx)
 	})
+}
+
+func (s *Storage) GetUserByLineID(ctx context.Context, lineID string) (*model.User, error) {
+	var u model.User
+	err := s.db.NewSelect().Model(&u).Where("line_id = ?", lineID).Scan(ctx)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &u, nil
 }
 
 func (s *Storage) UpsertUserByLineID(ctx context.Context, d model.User) error {
@@ -33,7 +46,7 @@ func (s *Storage) UpsertUserByLineID(ctx context.Context, d model.User) error {
 	return err
 }
 
-func (s *Storage) CreatePlace(ctx context.Context, d model.Place) error {
+func (s *Storage) CreatePlaces(ctx context.Context, d []model.Place) error {
 	_, err := s.db.NewInsert().Model(&d).Exec(ctx)
 	return err
 }
@@ -55,7 +68,7 @@ func (s *Storage) AddTagsToPlace(ctx context.Context, placeID uuid.UUID, tagName
 		return nil
 	}
 
-	return WithTx(ctx, s.db, func(ctx context.Context, tx bun.Tx) error {
+	return s.WithTx(ctx, func(ctx context.Context, tx bun.Tx) error {
 		var tags []*model.Tag
 		for _, name := range norm {
 			tag := &model.Tag{Name: name}
